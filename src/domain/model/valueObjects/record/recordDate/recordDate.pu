@@ -1,0 +1,9 @@
+@startuml RecordDate
+class "RecordDate(記録日時)" as RecordDate {
+    + value: Date
+}
+
+note bottom of RecordDate
+    現在または過去の日付のみ設定可能
+end note    
+@enduml

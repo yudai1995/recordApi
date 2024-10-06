@@ -1,0 +1,11 @@
+@startuml NumberOfRecords
+
+class "NumberOfRecords(レコード数)" as NumberOfRecords {
+    + value: number
+}
+
+note bottom of NumberOfRecords
+    MIN = 0
+end note
+
+@enduml

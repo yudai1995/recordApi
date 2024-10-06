@@ -1,0 +1,11 @@
+@startuml RecordAggregation
+
+title 記録集約 (Record Aggregation)
+
+package "記録集約(RecordAggregation)" {
+    !include ./entities/record.pu
+    !include ./entities/category.pu
+
+    Record --o Category : "1..* 記録は1カテゴリに属する\n1カテゴリには複数の記録が存在可能"
+}
+@enduml

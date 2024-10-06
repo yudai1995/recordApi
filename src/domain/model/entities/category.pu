@@ -1,0 +1,26 @@
+@startuml Category
+
+!include ../valueObjects/category/categoryId/categoryId.pu
+!include ../valueObjects/category/categoryName/categoryName.pu
+!include ../valueObjects/category/numberOfRecords/numberOfRecords.pu
+!include ../valueObjects/lastUpdate/lastUpdate.pu
+
+class "Category(カテゴリ)" as Category << (E,green) Entity >> {
+    CategoryId: カテゴリID
+    CategoryName: カテゴリ名        
+    NumberOfRecords: レコード数
+    LastUpdate: 最終更新日時
+}
+
+note bottom of Category
+    - 一つのカテゴリには複数の記録が存在可能
+    - カテゴリに関連付けられた記録がある場合、カテゴリ名を更新時は確認する
+    また削除はできない
+    - 初回作成時のレコード数は0
+end note
+
+Category *-down- CategoryId : "主キー"
+Category *-down- CategoryName
+Category *-down- NumberOfRecords
+Category *-down- LastUpdate
+@enduml
