@@ -1,0 +1,5 @@
+@startuml LastUpdate
+class "LastUpdate(最終更新日時)" as LastUpdate {
+    + value: Date
+}
+@enduml

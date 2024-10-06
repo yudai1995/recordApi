@@ -1,0 +1,9 @@
+@startuml BookId
+class "Id" as Id {
+    + value: string
+}
+
+note bottom of Id
+    自動採番
+end note
+@enduml

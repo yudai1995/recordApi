@@ -1,0 +1,9 @@
+@startuml CategoryId
+class "CategoryId(カテゴリID)" as CategoryId {
+    + value: string
+}
+
+note bottom of CategoryId
+    自動採番
+end note
+@enduml

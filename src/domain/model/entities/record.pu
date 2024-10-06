@@ -1,0 +1,27 @@
+@startuml RecordAggregation
+
+!include ../valueObjects/record/id/id.pu
+!include ../valueObjects/category/categoryId/categoryId.pu
+!include ../valueObjects/record/title/title.pu
+!include ../valueObjects/record/recordDate/recordDate.pu
+!include ../valueObjects/lastUpdate/lastUpdate.pu
+
+class "Record(記録)" as Record << (R,red) RootEntity >> {
+    Id: ID
+    CategoryId: カテゴリID
+    Title: タイトル
+    RecordDate: 記録日時
+    LastUpdate: 最終更新日時
+}
+
+note bottom of Record
+    記録は一つのカテゴリ (Category) に紐づけられる
+end note
+
+Record *-down- Id
+Record *-down- CategoryId : "外部キー"
+Record *-down- Title
+Record *-down- RecordDate
+Record *-down- LastUpdate
+
+@enduml
