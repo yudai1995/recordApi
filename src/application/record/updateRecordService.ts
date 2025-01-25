@@ -1,4 +1,5 @@
 import { Inject, Injectable } from '@nestjs/common';
+
 import { Record } from '../../domain/model/entities/record';
 import { RecordRepository } from '../../infrastructure/typeORM/repository/recordRepository';
 import { Id } from '../../domain/model/valueObjects/record/id/id';

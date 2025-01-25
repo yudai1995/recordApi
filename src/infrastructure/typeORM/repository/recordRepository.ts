@@ -1,5 +1,6 @@
 import { Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
 import { DeleteResult, EntityManager } from 'typeorm';
+
 import { Record as TypeORMRecord } from '../entities/record.entity';
 import { Record as DomainRecord } from '../../../domain/model/entities/record';
 import { IRecordRepository } from '../../../domain/model/repository/IRecordRepository';

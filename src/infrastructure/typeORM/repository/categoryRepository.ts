@@ -1,13 +1,14 @@
 import { Inject, Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
 import { DeleteResult, EntityManager } from 'typeorm';
-import { CategoryName } from '../../../domain/model/valueObjects/category/categoryName/categoryName';
 
+import { CategoryName } from '../../../domain/model/valueObjects/category/categoryName/categoryName';
 import { Category as TypeORMCategory } from '../entities/category.entity';
 import { Category as DomainCategory } from '../../../domain/model/entities/category';
 import { CategoryConverter } from '../../converter/categoryConverter';
 import { ICategoryRepository } from '../../../domain/model/repository/ICategoryRepository';
 import { CategoryDuplicationCheckService } from '../../../domain/services/categoryDuplicationCheckService';
 import { CategoryId } from '../../../domain/model/valueObjects/category/categoryId/categoryid';
+
 import { RecordRepository } from './recordRepository';
 
 @Injectable()

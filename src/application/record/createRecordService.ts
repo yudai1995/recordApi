@@ -1,4 +1,5 @@
 import { Inject, Injectable } from '@nestjs/common';
+
 import { Record } from '../../domain/model/entities/record';
 import { ITransactionManager } from '../../domain/model/shared/ITransactionManager';
 import { CategoryId } from '../../domain/model/valueObjects/category/categoryId/categoryid';

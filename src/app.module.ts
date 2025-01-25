@@ -1,9 +1,11 @@
-import { ConfigModule, ConfigService } from '@nestjs/config';
-import config from '../config/configuration';
-import { TypeOrmModule } from '@nestjs/typeorm';
-import { AppService } from './app.service';
-import { AppController } from './app.controller';
 import { Module } from '@nestjs/common';
+import { ConfigModule, ConfigService } from '@nestjs/config';
+import { TypeOrmModule } from '@nestjs/typeorm';
+
+import config from '../config/configuration';
+
+import { AppController } from './app.controller';
+import { AppService } from './app.service';
 import { CategoryModule } from './presentation/controllers/category.module';
 import { RecordModule } from './presentation/controllers/record.module';
 

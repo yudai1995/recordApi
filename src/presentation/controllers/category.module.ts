@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
-import { CategoryController } from '../../presentation/controllers/category.controller';
 import { TypeOrmModule } from '@nestjs/typeorm';
+
+import { CategoryController } from '../../presentation/controllers/category.controller';
 import { CategoryDuplicationCheckService } from '../../domain/services//categoryDuplicationCheckService';
 import { CategoryRepository } from '../../infrastructure/typeORM/repository/categoryRepository';
 import { Category } from '../../infrastructure/typeORM/entities/category.entity';

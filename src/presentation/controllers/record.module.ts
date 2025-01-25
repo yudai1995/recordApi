@@ -1,6 +1,6 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { RecordController } from './record.controller';
+
 import { Record } from '../../infrastructure/typeORM/entities/record.entity';
 import { RecordRepository } from '../../infrastructure/typeORM/repository/recordRepository';
 import { DeleteRecordService } from '../../application/record/deleteRecordService';
@@ -9,6 +9,8 @@ import { GetAllRecordsService } from '../../application/record/getAllRecordsServ
 import { UpdateRecordService } from '../../application/record/updateRecordService';
 import { CreateRecordService } from '../../application/record/createRecordService';
 import { TransactionManager } from '../../infrastructure/typeORM/shared/transactionManager';
+
+import { RecordController } from './record.controller';
 
 @Module({
     controllers: [RecordController],

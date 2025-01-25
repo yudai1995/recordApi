@@ -1,6 +1,7 @@
+import { DeleteResult, EntityManager } from 'typeorm';
+
 import { Id } from '../valueObjects/record/id/id';
 import { Record } from '../entities/record';
-import { DeleteResult, EntityManager } from 'typeorm';
 import { CategoryId } from '../valueObjects/category/categoryId/categoryid';
 
 export interface IRecordRepository {

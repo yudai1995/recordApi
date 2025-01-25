@@ -1,4 +1,5 @@
 import { Inject, Injectable } from '@nestjs/common';
+
 import { Id } from '../../domain/model/valueObjects/record/id/id';
 import { RecordRepository } from '../../infrastructure/typeORM/repository/recordRepository';
 import { ITransactionManager } from '../../domain/model/shared/ITransactionManager';

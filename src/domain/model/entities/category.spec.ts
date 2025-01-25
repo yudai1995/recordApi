@@ -2,6 +2,7 @@ import { InMemoryCategoryRepository } from '../../../infrastructure/inMemory/inM
 import { CategoryDuplicationCheckService } from '../../services/categoryDuplicationCheckService';
 import { CategoryName } from '../valueObjects/category/categoryName/categoryName';
 import { LastUpdate } from '../valueObjects/lastUpdate/lastUpdate';
+
 import { Category } from './category';
 
 describe('カテゴリのエンティティのテスト', () => {
