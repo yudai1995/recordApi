@@ -1,15 +1,15 @@
-import { Module } from '@nestjs/common';
-import { TypeOrmModule } from '@nestjs/typeorm';
+import { Module, forwardRef } from '@nestjs/common';
+import { MongooseModule } from '@nestjs/mongoose';
 
-import { Record } from '../../infrastructure/typeORM/entities/record.entity';
-import { RecordRepository } from '../../infrastructure/typeORM/repository/recordRepository';
+import { CreateRecordService } from '../../application/record/createRecordService';
 import { DeleteRecordService } from '../../application/record/deleteRecordService';
 import { FindRecordByIdService } from '../../application/record/findRecordByIdService';
 import { GetAllRecordsService } from '../../application/record/getAllRecordsService';
 import { UpdateRecordService } from '../../application/record/updateRecordService';
-import { CreateRecordService } from '../../application/record/createRecordService';
-import { TransactionManager } from '../../infrastructure/typeORM/shared/transactionManager';
+import { RecordRepository } from '../../infrastructure/typeORM/repository/recordRepository';
+import { Record, RecordSchema } from '../../infrastructure/typeORM/schema/record.schema';
 
+import { CategoryModule } from './category.module';
 import { RecordController } from './record.controller';
 
 @Module({
@@ -21,12 +21,12 @@ import { RecordController } from './record.controller';
         UpdateRecordService,
         CreateRecordService,
         FindRecordByIdService,
-        {
-            provide: 'ITransactionManager',
-            useClass: TransactionManager,
-        },
     ],
-    imports: [TypeOrmModule.forFeature([Record])],
-    exports: [RecordRepository],
+    imports: [
+        MongooseModule.forFeature([{ name: Record.name, schema: RecordSchema }]),
+        forwardRef(() => CategoryModule),
+    ],
+    exports: [MongooseModule, RecordRepository],
 })
 export class RecordModule {}
+// 1

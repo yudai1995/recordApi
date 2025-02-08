@@ -1,8 +1,8 @@
 import { DeleteResult, EntityManager } from 'typeorm';
 
+import { Category } from '../entities/category';
 import { CategoryId } from '../valueObjects/category/categoryId/categoryid';
 import { CategoryName } from '../valueObjects/category/categoryName/categoryName';
-import { Category } from '../entities/category';
 
 export interface ICategoryRepository {
     save(category: Category, entityManager: EntityManager): Promise<void>;

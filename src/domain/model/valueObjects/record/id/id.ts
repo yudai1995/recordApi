@@ -7,7 +7,6 @@ export class Id extends ValueObject<string, 'Id'> {
         super(value);
     }
 
-     
     protected validate(id: string): void {
         // Todo: バリデーション
     }
