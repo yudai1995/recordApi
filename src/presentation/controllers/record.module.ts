@@ -29,4 +29,3 @@ import { RecordController } from './record.controller';
     exports: [MongooseModule, RecordRepository],
 })
 export class RecordModule {}
-// 1

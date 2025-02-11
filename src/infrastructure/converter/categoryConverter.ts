@@ -6,7 +6,6 @@ import { LastUpdate } from '../../domain/model/valueObjects/lastUpdate/lastUpdat
 import { CategoryDuplicationCheckService } from '../../domain/services//categoryDuplicationCheckService';
 import { Category as TypeORMCategory } from '../typeORM/entities/category.entity';
 import { CategoryRepository } from '../typeORM/repository/categoryRepository';
-import { Category as MongooseCategory } from '../typeORM/schema/category.schema';
 
 export class CategoryConverter {
     /**
@@ -42,20 +41,5 @@ export class CategoryConverter {
         typeormCategory.categoryName = domainCategory.categoryName.value;
 
         return typeormCategory;
-    }
-
-    /**
-     * DDDエンティティからMongooseエンティティに変換
-     */
-    static toMongoose(domainCategory: DomainCategory): MongooseCategory {
-        const mongooseCategory = new MongooseCategory(
-            domainCategory.categoryName.value,
-            new Date(),
-            Number(domainCategory.categoryId.value),
-        );
-
-        mongooseCategory.categoryName = domainCategory.categoryName.value;
-
-        return mongooseCategory;
     }
 }

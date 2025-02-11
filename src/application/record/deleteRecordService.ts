@@ -10,7 +10,6 @@ export class DeleteRecordService {
 
     async execute(recordId: Id): Promise<DaleteRecordDto> {
         const result = await this.recordRepository.delete(recordId);
-        return new DaleteRecordDto(result.value ? Number(result.value) : null);
+        return new DaleteRecordDto(result.deletedCount ? Number(result.deletedCount) : null);
     }
 }
-

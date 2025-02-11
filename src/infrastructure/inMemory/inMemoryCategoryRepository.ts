@@ -1,4 +1,4 @@
-import { DeleteResult } from 'typeorm';
+import { DeleteResult } from 'mongoose';
 
 import { Category } from '../../domain/model/entities/category';
 import { ICategoryRepository } from '../../domain/model/repository/ICategoryRepository';
@@ -22,7 +22,7 @@ export class InMemoryCategoryRepository implements ICategoryRepository {
     async delete(categoryId: CategoryId): Promise<DeleteResult> {
         delete this.DB[categoryId.value];
 
-        return { raw: 1 };
+        return { acknowledged: undefined, deletedCount: 1 };
     }
 
     async findById(categoryId: CategoryId): Promise<Category | null> {

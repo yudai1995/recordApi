@@ -1,14 +1,31 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, Inject } from '@nestjs/common';
+import {
+    Body,
+    Controller,
+    Delete,
+    Get,
+    Inject,
+    InternalServerErrorException,
+    NotFoundException,
+    Param,
+    Patch,
+    Post,
+    UseFilters,
+} from '@nestjs/common';
 
-import { CategoryDto } from '../dto/category/categoryDto';
 import { CreateCategoryCommand, CreateCategoryService } from '../../application/category/createCategoryService';
 import { DeleteCategoryService } from '../../application/category/deleteCategoryService';
 import { FindCategoryByIdService } from '../../application/category/findCategoryByIdService';
 import { GetAllCategorysService } from '../../application/category/getAllCategoryiesService';
 import { UpdateCategoryCommand, UpdateCategoryService } from '../../application/category/updateCategoryService';
 import { CategoryId } from '../../domain/model/valueObjects/category/categoryId/categoryid';
+import { MongooseExceptionFilter } from '../../mongoose.exception.filter';
+import { CategoryDto } from '../dto/category/categoryDto';
+import { Status } from '../dto/shared/status';
 
 @Controller('category')
+// 関数全てに適用したいので class 定義の上で @UseFilters デコレータを用いて
+// コントローラーの関数全てに MongooseExceptionFilter を適用する
+@UseFilters(MongooseExceptionFilter)
 export class CategoryController {
     constructor(
         @Inject(CreateCategoryService) private readonly createCategoryService: CreateCategoryService,
@@ -19,23 +36,54 @@ export class CategoryController {
     ) {}
 
     @Post()
-    async create(@Body() createCategoryCommand: CreateCategoryCommand) {
-        return await this.createCategoryService.execute(createCategoryCommand);
+    async create(@Body() createCategoryCommand: CreateCategoryCommand): Promise<Status> {
+        {
+            try {
+                await this.createCategoryService.execute(createCategoryCommand);
+                return { statusCode: 200 };
+            } catch (error) {
+                throw new InternalServerErrorException(`カテゴリの作成に失敗しました: ${error.message}`);
+            }
+        }
     }
 
     @Get()
-    async findAll(): Promise<CategoryDto[]> {
-        return await this.getAllCategorysService.execute();
+    async findAll(): Promise<Status & { categories: CategoryDto[] }> {
+        try {
+            const result = await this.getAllCategorysService.execute();
+            return { statusCode: 200, categories: result };
+        } catch (error) {
+            throw new InternalServerErrorException(`カテゴリの取得に失敗しました: ${error.message}`);
+        }
     }
 
     @Get(':id')
-    async findOne(@Param('id') categoryId: string) {
-        return await this.findCategoryByIdService.execute(new CategoryId(categoryId));
+    async findOne(@Param('id') categoryId: string): Promise<Status & { category?: CategoryDto }> {
+        try {
+            const result = await this.findCategoryByIdService.execute(new CategoryId(categoryId));
+            return { statusCode: 200, category: result };
+        } catch (error) {
+            if (error instanceof NotFoundException) {
+                return { statusCode: 404, message: 'カテゴリが見つかりません' };
+            }
+            throw new InternalServerErrorException(`カテゴリの取得に失敗しました: ${error.message}`);
+        }
     }
 
     @Patch(':id')
-    async update(@Param('id') categoryId: string, @Body() updateCategoryCommand: UpdateCategoryCommand) {
-        return await this.updateCategoryService.execute(categoryId, updateCategoryCommand);
+    async update(
+        @Param('id') categoryId: string,
+        @Body() updateCategoryCommand: UpdateCategoryCommand,
+    ): Promise<Status> {
+        try {
+            await this.updateCategoryService.execute(categoryId, updateCategoryCommand);
+            return { statusCode: 200 };
+        } catch (error) {
+            if (error instanceof NotFoundException) {
+                return { statusCode: 404, message: 'カテゴリが見つかりません' };
+            }
+            throw new InternalServerErrorException(`カテゴリの更新に失敗しました: ${error.message}`);
+        }
     }
 
     @Delete(':id')

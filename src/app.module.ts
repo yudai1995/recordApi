@@ -9,12 +9,6 @@ import { RecordModule } from './presentation/controllers/record.module';
 
 @Module({
     imports: [
-        // AppModule,
-        // ConfigModule.forRoot({
-        //     isGlobal: true,
-        //     load: [config],
-        // }),
-
         ConfigModule.forRoot(),
 
         // MongooseModule を用いて MongoDB との接続を行う
@@ -27,4 +21,3 @@ import { RecordModule } from './presentation/controllers/record.module';
     providers: [AppService],
 })
 export class AppModule {}
-
