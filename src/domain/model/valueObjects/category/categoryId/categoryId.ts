@@ -1,4 +1,5 @@
 import { nanoid } from 'nanoid';
+
 import { ValueObject } from '../../shared/valueObject';
 
 export class CategoryId extends ValueObject<string, 'CategoryId'> {

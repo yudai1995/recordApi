@@ -1,11 +1,11 @@
 import { Inject, Injectable } from '@nestjs/common';
+
 import { Record } from '../../domain/model/entities/record';
-import { ITransactionManager } from '../../domain/model/shared/ITransactionManager';
 import { CategoryId } from '../../domain/model/valueObjects/category/categoryId/categoryid';
-import { Title } from '../../domain/model/valueObjects/record/title/title';
 import { RecordDate } from '../../domain/model/valueObjects/record/recordDate/RecordDate';
-import { RecordDto } from '../../presentation/dto/record/recordDto';
+import { Title } from '../../domain/model/valueObjects/record/title/title';
 import { RecordRepository } from '../../infrastructure/typeORM/repository/recordRepository';
+import { RecordDto } from '../../presentation/dto/record/recordDto';
 
 export type CreateRecordCommand = {
     categoryId: string;
@@ -15,21 +15,16 @@ export type CreateRecordCommand = {
 
 @Injectable()
 export class CreateRecordService {
-    constructor(
-        @Inject(RecordRepository) private readonly recordRepository: RecordRepository,
-        @Inject('ITransactionManager') private readonly transactionManager: ITransactionManager,
-    ) {}
+    constructor(@Inject(RecordRepository) private readonly recordRepository: RecordRepository) {}
 
     async execute(createRecordCommand: CreateRecordCommand): Promise<RecordDto> {
-        return this.transactionManager.begin(async (entityManager) => {
-            const record = Record.create(
-                new CategoryId(createRecordCommand.categoryId),
-                new Title(createRecordCommand.title),
-                new RecordDate(new Date(createRecordCommand.recordDate)),
-            );
-            const newRecord = await this.recordRepository.save(record, entityManager);
-
-            return new RecordDto(newRecord);
-        });
+        const record = Record.create(
+            new CategoryId(createRecordCommand.categoryId),
+            new Title(createRecordCommand.title),
+            new RecordDate(new Date(createRecordCommand.recordDate)),
+        );
+        const newRecord = await this.recordRepository.save(record);
+        return new RecordDto(newRecord);
     }
 }
+

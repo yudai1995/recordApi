@@ -1,19 +1,24 @@
 import { Inject, Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
-import { DeleteResult, EntityManager } from 'typeorm';
-import { CategoryName } from '../../../domain/model/valueObjects/category/categoryName/categoryName';
+import { InjectModel } from '@nestjs/mongoose';
+import { Model } from 'mongoose';
+import { DeleteResult } from 'typeorm';
 
-import { Category as TypeORMCategory } from '../entities/category.entity';
 import { Category as DomainCategory } from '../../../domain/model/entities/category';
-import { CategoryConverter } from '../../converter/categoryConverter';
 import { ICategoryRepository } from '../../../domain/model/repository/ICategoryRepository';
-import { CategoryDuplicationCheckService } from '../../../domain/services/categoryDuplicationCheckService';
 import { CategoryId } from '../../../domain/model/valueObjects/category/categoryId/categoryid';
+import { CategoryName } from '../../../domain/model/valueObjects/category/categoryName/categoryName';
+import { CategoryDuplicationCheckService } from '../../../domain/services/categoryDuplicationCheckService';
+import { CategoryConverter } from '../../converter/categoryConverter';
+import { Category as MongooseCategory } from '../schema/category.schema';
+
 import { RecordRepository } from './recordRepository';
 
 @Injectable()
 export class CategoryRepository implements ICategoryRepository {
     constructor(
-        private readonly entityManager: EntityManager,
+        // MongooseModule でインポートした場合は @nestjs/mongoose に用意されている
+        // @InjectModel デコレータでインジェクション時に名前を定義する必要がある
+        @InjectModel(MongooseCategory.name) private readonly categoryModel: Model<MongooseCategory>,
         private readonly categoryDuplicationCheckService: CategoryDuplicationCheckService,
         @Inject(RecordRepository) private readonly recordRepository: RecordRepository,
     ) {}
@@ -21,23 +26,22 @@ export class CategoryRepository implements ICategoryRepository {
     /**
      * 新規カテゴリを保存
      * @param domainCategory カテゴリエンティティ
-     * @param entityManager
      */
-    async save(domainCategory: DomainCategory, entityManager: EntityManager): Promise<void> {
-        const typeormCategory = CategoryConverter.toTypeORM(domainCategory);
-        await entityManager.save(typeormCategory);
+    async save(domainCategory: DomainCategory): Promise<void> {
+        const mongooseCategory = CategoryConverter.toMongoose(domainCategory);
+        await new this.categoryModel(mongooseCategory).save();
     }
 
     /**
      * カテゴリ名を更新
      * @param domainCategory カテゴリエンティティ
-     * @param entityManager
      */
-    async update(domainCategory: DomainCategory, entityManager: EntityManager): Promise<void> {
-        const typeormCategory = CategoryConverter.toTypeORM(domainCategory);
-        await entityManager.update(TypeORMCategory, typeormCategory.categoryId, {
-            categoryName: typeormCategory.categoryName,
-        });
+    async update(domainCategory: DomainCategory): Promise<void> {
+        const mongooseCategory = CategoryConverter.toMongoose(domainCategory);
+        await this.categoryModel.updateOne(
+            { _id: mongooseCategory._id },
+            { categoryName: mongooseCategory.categoryName },
+        );
     }
 
     /**
@@ -45,7 +49,7 @@ export class CategoryRepository implements ICategoryRepository {
      * @param categoryId カテゴリID
      */
     async findById(categoryId: CategoryId): Promise<DomainCategory | null> {
-        const category = await this.entityManager.findOneBy(TypeORMCategory, { categoryId: Number(categoryId.value) });
+        const category = await this.categoryModel.findById(categoryId.value).exec();
         if (!category) {
             return null;
         }
@@ -58,7 +62,7 @@ export class CategoryRepository implements ICategoryRepository {
      * @param categoryName カテゴリ名
      */
     async findByName(categoryName: CategoryName): Promise<DomainCategory | null> {
-        const category = await this.entityManager.findOneBy(TypeORMCategory, { categoryName: categoryName.value });
+        const category = await this.categoryModel.findOne({ categoryName: categoryName.value }).exec();
         if (!category) {
             return null;
         }
@@ -69,18 +73,16 @@ export class CategoryRepository implements ICategoryRepository {
      * 全てのカテゴリを取得
      */
     async findAll(): Promise<DomainCategory[]> {
-        const typeormCategories = await this.entityManager
-            .find(TypeORMCategory, {
-                order: {
-                    categoryId: 'ASC',
-                },
-            })
+        const mongooseCategories = await this.categoryModel
+            .find()
+            .sort({ _id: 'asc' })
+            .exec()
             .catch((e) => {
                 throw new InternalServerErrorException(`[${e.message}]：レコードの取得に失敗しました。`);
             });
 
         return await Promise.all(
-            typeormCategories.map((category) =>
+            mongooseCategories.map((category) =>
                 CategoryConverter.toDomain(category, this.categoryDuplicationCheckService, this),
             ),
         );
@@ -91,13 +93,14 @@ export class CategoryRepository implements ICategoryRepository {
      * @param categoryId カテゴリID
      * @param entityManager
      */
-    async delete(categoryId: CategoryId, entityManager: EntityManager): Promise<DeleteResult> {
+    async delete(categoryId: CategoryId): Promise<DeleteResult> {
         const record = await this.findById(categoryId);
         if (!record) {
             throw new NotFoundException();
         }
 
-        return await entityManager.delete(TypeORMCategory, { categoryId: Number(categoryId.value) });
+        await this.categoryModel.deleteOne({ _id: categoryId.value }).exec();
+        return { raw: 1 };
     }
 
     /**
@@ -106,6 +109,6 @@ export class CategoryRepository implements ICategoryRepository {
      * @returns レコードの数
      */
     async countRecordsByCategoryId(categoryId: CategoryId): Promise<number> {
-        return await this.recordRepository.findByCategoryIdId(categoryId);
+        return await this.recordRepository.findByCategoryId(categoryId);
     }
 }

@@ -6,4 +6,6 @@ export default () => ({
         password: process.env.password || 'password',
         name: process.env.database || 'recorder',
     },
+    mongouri: 'mongodb://Admin:password@localhost:27017/recorder',
+    
 });

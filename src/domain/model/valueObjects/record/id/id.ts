@@ -1,4 +1,5 @@
 import { customAlphabet } from 'nanoid';
+
 import { ValueObject } from '../../shared/valueObject';
 
 export class Id extends ValueObject<string, 'Id'> {
@@ -6,7 +7,6 @@ export class Id extends ValueObject<string, 'Id'> {
         super(value);
     }
 
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     protected validate(id: string): void {
         // Todo: バリデーション
     }
