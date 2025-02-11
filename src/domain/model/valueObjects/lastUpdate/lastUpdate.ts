@@ -7,9 +7,10 @@ export class LastUpdate extends ValueObject<Date, 'LastUpdate'> {
 
     protected validate(lastUpdate: Date): void {
         const today = new Date();
-        if (lastUpdate > today) {
-            throw new Error('未来の日付は登録できません。');
-        }
+        // TODO
+        // if (lastUpdate > today) {
+        //     throw new Error('未来の日付は登録できません。');
+        // }
     }
 
     get value(): Date {

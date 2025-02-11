@@ -7,9 +7,10 @@ export class RecordDate extends ValueObject<Date, 'RecordDate'> {
 
     protected validate(date: Date): void {
         const today = new Date();
-        if (date > today) {
-            throw new Error('未来の日付は登録できません。');
-        }
+        // TODO
+        // if (date > today) {
+        //     throw new Error('未来の日付は登録できません。');
+        // }
     }
 
     get value(): Date {
