@@ -8,7 +8,7 @@ export async function createApp(): Promise<INestApplication> {
 
     // CORSの設定
     app.enableCors({
-        origin: 'http://localhost:4200',
+        origin: process.env.WEBFRONT_PATH,
         methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
         credentials: true,
     });
