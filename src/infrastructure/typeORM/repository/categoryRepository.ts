@@ -1,7 +1,6 @@
 import { Inject, Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
-import { DeleteResult } from 'typeorm';
+import { DeleteResult, Model } from 'mongoose';
 
 import { Category as DomainCategory } from '../../../domain/model/entities/category';
 import { ICategoryRepository } from '../../../domain/model/repository/ICategoryRepository';
@@ -28,8 +27,16 @@ export class CategoryRepository implements ICategoryRepository {
      * @param domainCategory カテゴリエンティティ
      */
     async save(domainCategory: DomainCategory): Promise<void> {
-        const mongooseCategory = CategoryConverter.toMongoose(domainCategory);
-        await new this.categoryModel(mongooseCategory).save();
+        await new this.categoryModel({
+            categoryId: domainCategory.categoryId.value,
+            categoryName: domainCategory.categoryName.value,
+            createDate: new Date(),
+            lastUpdate: domainCategory.lastUpdate.value,
+        })
+            .save()
+            .catch((e: { message: any }) => {
+                throw new InternalServerErrorException(`[${e.message}]：カテゴリの登録に失敗しました。`);
+            });
     }
 
     /**
@@ -37,11 +44,14 @@ export class CategoryRepository implements ICategoryRepository {
      * @param domainCategory カテゴリエンティティ
      */
     async update(domainCategory: DomainCategory): Promise<void> {
-        const mongooseCategory = CategoryConverter.toMongoose(domainCategory);
-        await this.categoryModel.updateOne(
-            { _id: mongooseCategory._id },
-            { categoryName: mongooseCategory.categoryName },
-        );
+        await this.categoryModel
+            .updateOne(
+                { categoryId: domainCategory.categoryId.value },
+                { categoryName: domainCategory.categoryName.value },
+            )
+            .catch((e: { message: any }) => {
+                throw new InternalServerErrorException(`[${e.message}]：カテゴリ名の更新に失敗しました。`);
+            });
     }
 
     /**
@@ -49,7 +59,7 @@ export class CategoryRepository implements ICategoryRepository {
      * @param categoryId カテゴリID
      */
     async findById(categoryId: CategoryId): Promise<DomainCategory | null> {
-        const category = await this.categoryModel.findById(categoryId.value).exec();
+        const category = await this.categoryModel.findOne({ categoryId: categoryId.value }).exec();
         if (!category) {
             return null;
         }
@@ -75,7 +85,7 @@ export class CategoryRepository implements ICategoryRepository {
     async findAll(): Promise<DomainCategory[]> {
         const mongooseCategories = await this.categoryModel
             .find()
-            .sort({ _id: 'asc' })
+            .sort({ createDate: -1 })
             .exec()
             .catch((e) => {
                 throw new InternalServerErrorException(`[${e.message}]：レコードの取得に失敗しました。`);
@@ -94,13 +104,11 @@ export class CategoryRepository implements ICategoryRepository {
      * @param entityManager
      */
     async delete(categoryId: CategoryId): Promise<DeleteResult> {
-        const record = await this.findById(categoryId);
-        if (!record) {
-            throw new NotFoundException();
+        const result = await this.categoryModel.deleteOne({ _id: categoryId.value }).exec();
+        if (result.deletedCount === 0) {
+            throw new NotFoundException('削除対象のカテゴリが見つかりません。');
         }
-
-        await this.categoryModel.deleteOne({ _id: categoryId.value }).exec();
-        return { raw: 1 };
+        return result;
     }
 
     /**

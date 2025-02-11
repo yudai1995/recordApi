@@ -1,6 +1,6 @@
 import { Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
+import { DeleteResult, Model } from 'mongoose';
 
 import { Record as DomainRecord } from '../../../domain/model/entities/record';
 import { IRecordRepository } from '../../../domain/model/repository/IRecordRepository';
@@ -20,11 +20,17 @@ export class RecordRepository implements IRecordRepository {
      * @param domainRecord レコードエンティティ
      */
     async save(domainRecord: DomainRecord): Promise<DomainRecord> {
-        const typeormRecord = RecordConverter.toMongoose(domainRecord);
-        const newTypeormRecord = await typeormRecord.save().catch((e: { message: any }) => {
-            throw new InternalServerErrorException(`[${e.message}]：レコードの登録に失敗しました。`);
-        });
-        return RecordConverter.toDomain(newTypeormRecord);
+        const newModel = await new this.recordModel({
+            id: domainRecord.id.value,
+            categoryId: domainRecord.categoryId.value,
+            title: domainRecord.title.value,
+            recordDate: domainRecord.recordDate.value,
+        })
+            .save()
+            .catch((e: { message: any }) => {
+                throw new InternalServerErrorException(`[${e.message}]：レコードの登録に失敗しました。`);
+            });
+        return RecordConverter.toDomain(newModel);
     }
 
     /**
@@ -32,39 +38,38 @@ export class RecordRepository implements IRecordRepository {
      * @param domainRecord レコードエンティティ
      */
     async update(domainRecord: DomainRecord): Promise<void> {
-        const typeormRecord = RecordConverter.toMongoose(domainRecord);
-
-        const record = await this.recordModel.findById(new Id(typeormRecord.id.toString()).value).exec();
+        const record = await this.findById(new Id(domainRecord.id.value.toString()));
         if (!record) {
             throw new NotFoundException();
         }
 
         await this.recordModel
-            .findByIdAndUpdate(
-                typeormRecord.id,
+            .updateOne(
+                { id: domainRecord.id.value },
                 {
-                    categoryId: typeormRecord.categoryId,
-                    title: typeormRecord.title,
-                    recordDate: typeormRecord.recordDate,
-                    lastUpdate: typeormRecord.lastUpdate,
+                    categoryId: domainRecord.categoryId.value,
+                    title: domainRecord.title.value,
+                    recordDate: domainRecord.recordDate.value,
+                    lastUpdate: new Date(),
                 },
                 { new: true },
             )
-            .exec();
+            .exec()
+            .catch((e: { message: any }) => {
+                throw new InternalServerErrorException(`[${e.message}]：レコードの更新に失敗しました。`);
+            });
     }
 
     /**
      * レコードを削除
      * @param id レコードID
      */
-    async delete(id: Id): Promise<Id> {
-        const record = await this.findById(id);
-        if (!record) {
-            throw new NotFoundException();
+    async delete(id: Id): Promise<DeleteResult> {
+        const result = await this.recordModel.deleteOne({ id: id.value }).exec();
+        if (result.deletedCount === 0) {
+            throw new NotFoundException('削除対象のレコードが見つかりません。');
         }
-
-        const result = await this.recordModel.findByIdAndDelete(id).exec();
-        return new Id(result.id);
+        return result;
     }
 
     /**
@@ -89,7 +94,7 @@ export class RecordRepository implements IRecordRepository {
      */
     async findById(id: Id): Promise<DomainRecord | null> {
         try {
-            const mongooseRecord = await this.recordModel.findById(id).exec();
+            const mongooseRecord = await this.recordModel.findOne({ id: id.value }).exec();
             if (!mongooseRecord) {
                 throw new NotFoundException('記録が見つかりません。');
             }
@@ -106,9 +111,6 @@ export class RecordRepository implements IRecordRepository {
     async findByCategoryId(categoryId: CategoryId): Promise<number | null> {
         try {
             const mongooseRecords = await this.recordModel.find({ categoryId: categoryId.value }).exec();
-            if (!mongooseRecords || mongooseRecords.length === 0) {
-                throw new NotFoundException('記録が見つかりません。');
-            }
             return mongooseRecords.length;
         } catch (e) {
             throw new InternalServerErrorException(`[${e.message}]：レコードの取得に失敗しました。`);

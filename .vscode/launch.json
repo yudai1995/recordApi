@@ -7,13 +7,14 @@
         {
             "type": "node",
             "request": "launch",
-            "name": "プログラムの起動",
+            "name": "Debug Azure Functions",
             "skipFiles": ["<node_internals>/**"],
             "runtimeExecutable": "npm",
-            "runtimeArgs": ["run", "start:debug"],
+            "runtimeArgs": ["run", "start:azure"],
+            "env": {
+                "MONGODB_URI": "mongodb://Admin:password@localhost:27017/recorder?authSource=admin"
+            },
             "outFiles": ["${workspaceFolder}/dist/**/*.js"],
-            "preLaunchTask": "tsc: build - tsconfig.json",      
-            "program": "${workspaceFolder}/dist/main.js",
             "sourceMaps": true
         }
     ]

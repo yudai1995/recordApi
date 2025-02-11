@@ -5,7 +5,6 @@ import { Id } from '../../domain/model/valueObjects/record/id/id';
 import { RecordDate } from '../../domain/model/valueObjects/record/recordDate/RecordDate';
 import { Title } from '../../domain/model/valueObjects/record/title/title';
 import { Record as TypeORMRecord } from '../typeORM/entities/record.entity';
-import { Record as MongooseRecord } from '../typeORM/schema/record.schema';
 
 export class RecordConverter {
     /**
@@ -26,20 +25,6 @@ export class RecordConverter {
      */
     static toTypeORM(domainRecord: DomainRecord): TypeORMRecord {
         const typeormRecord = new TypeORMRecord(
-            Number(domainRecord.categoryId.value),
-            domainRecord.title.value,
-            domainRecord.recordDate.value,
-            domainRecord.id.value ? Number(domainRecord.id.value) : undefined,
-        );
-
-        return typeormRecord;
-    }
-
-    /**
-     * DDDエンティティからMongooseエンティティに変換
-     */
-    static toMongoose(domainRecord: DomainRecord): MongooseRecord {
-        const typeormRecord = new MongooseRecord(
             Number(domainRecord.categoryId.value),
             domainRecord.title.value,
             domainRecord.recordDate.value,
